@@ -6,8 +6,8 @@ const cors = require('cors')
 const userController = require('./controllers/UserController')
 
 app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cors())
+app.use(bodyParser.urlencoded({ extended: true })) //get form
+app.use(cors()) // commutication with front-end
 
 app.use('/user', userController);
 

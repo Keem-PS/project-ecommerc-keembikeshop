@@ -4,6 +4,7 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
+
 dotenv.config()
 
 app.post('/signIn', async (req, res) => {
@@ -23,6 +24,8 @@ app.post('/signIn', async (req, res) => {
         if (user != null) {
             const secret = process.env.TOKEN_SECRET;
             const token = jwt.sign(user, secret, {expiresIn: '90d'})
+
+            return res.send({ token: token})
         }
 
         res.status(401).send({ message: 'Unauthorized'})

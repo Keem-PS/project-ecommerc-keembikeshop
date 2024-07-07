@@ -1,32 +1,33 @@
 import React from 'react'
 import axios from 'axios'
-import { useStat } from 'react'
+import { useState } from 'react'
 import Swal from 'sweetalert2'
 import config from "../../config"
 import { useNavigate } from 'react-router-dom'
 
 function SignIn() {
-  const [user,setUser] = useStat({})
+  const [user,setUser] = useState({})
   const navigate = useNavigate()
 
   const handleSignIn = async () => {
     try {
+    
       const res = await axios.post(config.apiPath + '/user/signIn', user)
 
       if (res.data.token !== undefined) {
-        localStorage.setItem('token', res.data.token)
+        localStorage.setItem('tokenOfKeemBikeShop', res.data.token)
         navigate('/home')
       }
     } catch (e) {
-      if (e.response.status == 401) {
+      if (e.response.status === 401) {
         Swal.fire({
-          title: 'Sign In',
+          title: 'sign in',
           text: 'Username or Password invalid',
           icon: 'warning'
         })
       } else {
         Swal.fire({
-          title: 'Error',
+          title: 'error',
           text: e.message,
           icon: 'error'
         })
@@ -34,24 +35,22 @@ function SignIn() {
     }
   }
 
-
-
-
-
-
-
   return <div class="hold-transition login-page">
   <div class="login-box">
   <div class="login-logo">
-    <a href="../../index2.html"><b>Admin</b>LTE</a>
+    <a href="../../index2.html"><b>Sign In </b>Back Office</a>
   </div>
   <div class="card">
     <div class="card-body login-card-body">
       <p class="login-box-msg">Sign in to start your session</p>
 
-      <form action="../../index3.html" method="post">
+      <div>
         <div class="input-group mb-3">
-          <input type="email" class="form-control" placeholder="Email"/>
+          <input 
+            class="form-control" 
+            placeholder="User"
+            onChange={e => setUser({ ...user, user: e.target.value })}
+          />
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-envelope"></span>
@@ -59,7 +58,12 @@ function SignIn() {
           </div>
         </div>
         <div class="input-group mb-3">
-          <input type="password" class="form-control" placeholder="Password"/>
+          <input 
+          type="password" 
+          class="form-control" 
+          placeholder="Password"
+          onChange={e => setUser({ ...user, pass: e.target.value })}
+          />
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-lock"></span>
@@ -76,12 +80,17 @@ function SignIn() {
             </div>
           </div>
           <div class="col-4">
-            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+            <button 
+            class="btn btn-primary btn-block"
+            onClick={handleSignIn}
+            >
+            Sign In
+            </button>
           </div>
         </div>
-      </form>
+      </div>
 
-      <div class="social-auth-links text-center mb-3">
+       {/* <div class="social-auth-links text-center mb-3">
         <p>- OR -</p>
         <a href="#" class="btn btn-block btn-primary">
           <i class="fab fa-facebook mr-2"></i> Sign in using Facebook
@@ -89,7 +98,7 @@ function SignIn() {
         <a href="#" class="btn btn-block btn-danger">
           <i class="fab fa-google-plus mr-2"></i> Sign in using Google+
         </a>
-      </div>
+      </div> */}
       <p class="mb-1">
         <a href="forgot-password.html">I forgot my password</a>
       </p>
