@@ -15,7 +15,7 @@ function SignIn() {
       const res = await axios.post(config.apiPath + '/user/signIn', user)
 
       if (res.data.token !== undefined) {
-        localStorage.setItem('tokenOfKeemBikeShop', res.data.token)
+        localStorage.setItem('token', res.data.token)
         navigate('/home')
       }
     } catch (e) {
@@ -48,7 +48,7 @@ function SignIn() {
         <div class="input-group mb-3">
           <input 
             class="form-control" 
-            placeholder="User"
+            placeholder="Username"
             onChange={e => setUser({ ...user, user: e.target.value })}
           />
           <div class="input-group-append">
