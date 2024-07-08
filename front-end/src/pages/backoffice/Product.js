@@ -72,6 +72,34 @@ function Product() {
       <i className='fa fa-plus'>เพิ่มรายการ</i>
     </button>
 
+    <table className='mt-3 table table-bordered table-striped'>
+      <thead>
+        <tr>
+          <th>name</th>
+          <th width='150px' className='text-right'>cost</th>
+          <th width='150px' className='text-right'>price</th>
+          <th width='140px'></th>
+        </tr>
+      </thead>
+      <tbody>
+        {products.length > 0 ? products.map(item =>
+        <tr>
+          <td>{item.name}</td>
+          <td className='text-right'>{item.cost}</td>
+          <td className='text-right'>{item.price}</td>
+          <td className='text-center'>
+            <button className='btn btn-primary mr-2'>
+              <i className='fa fa-edit'></i>
+            </button>
+            <button className='btn btn-danger'>
+              <i className='fa fa-times'></i>
+            </button>
+          </td>
+        </tr>
+        ) : <></>}
+      </tbody>
+    </table>
+
     <MyModal id='modalProduct' title='สินค้า'>
       <div>
         <div>ชื่อสินค้า</div>
