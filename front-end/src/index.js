@@ -7,6 +7,7 @@ import {
   createBrowserRouter,
   RouterProvider
 } from 'react-router-dom'
+import Product from './pages/backoffice/Product'
 
 const router = createBrowserRouter ([
   {
@@ -16,6 +17,10 @@ const router = createBrowserRouter ([
   {
     path: '/home',
     element: <Home />
+  },
+  {
+    path: '/product',
+    element: <Product/>
   }
 ])
 

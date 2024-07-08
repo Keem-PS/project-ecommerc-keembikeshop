@@ -10,7 +10,7 @@ function BackOffice(props) {
     <Navbar />
     <Sidebar />
 
-    <div className='content-wrapper'>
+    <div className='content-wrapper p-3'>
         {props.children}
     </div>
 
