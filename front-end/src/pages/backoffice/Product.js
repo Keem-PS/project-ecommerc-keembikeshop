@@ -1,26 +1,40 @@
-import React, { useEffect } from 'react'
 import BackOffice from '../../components/BackOffice'
 import MyModal from '../../components/MyModal'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Swal from 'sweetalert2'
 import axios from 'axios'
 import config from '../../config'
 
 function Product() {
-  const [product, setProduct] = useState({})
-  const [products, setProducts] = useState([])
+  const [product, setProduct] = useState({}) // CREATE, UPDATE
+  const [products, setProducts] = useState([]) // SHOW PRODUCT
+  const [img, setImg] = useState({}) // File for Upload
+  const [fileExcel, setFileExcel] = useState({}) // File for Excel
+
+  const refImg = useRef()
+  const refExcel = useRef() 
 
   useEffect(() => {
     fetchData()
   }, [])
 
+  // Function Button Save
+
   const handleSave = async () => {
     try {
-      product.img = ''
+      product.img = await hadleUpload()
       product.price = parseInt(product.price)
       product.cost = parseInt(product.cost)
 
-      const res =await axios.post(config.apiPath + '/product/create', product, config.headers())
+      let res
+
+      if (product.id === undefined) {
+        res = await axios.post(config.apiPath + '/product/create', product, config.headers())
+      } else {
+        res = await axios.put(config.apiPath + '/product/update', product, config.headers())
+      }
+
+
 
       if (res.data.message === 'success') {
         Swal.fire({
@@ -31,15 +45,19 @@ function Product() {
         })
         document.getElementById('modalProduct_btnClose').click()
         fetchData()
+
+        setProduct({ ...product, id: undefined }) // clear id
       }
     } catch (e) {
       Swal.fire({
-        titile: 'error',
+        title: 'error',
         text: e.message,
         icon: 'error'
       })
     }
   }
+
+  //  Method Fetch Data product
 
   const fetchData = async () => {
     try {
@@ -58,24 +76,160 @@ function Product() {
 
   }
 
+  // Function Clear Form
+
   const clearForm = () => {
     setProduct({
       name: '',
       cost: '',
       price: ''
     })
+    setImg(null)
+    refImg.current.value = ''
   }
+
+  // Function Remove product
+
+  const handleRemove = async (item) => {
+    try {
+      const button = await Swal.fire({
+        text: 'remove item',
+        title: 'remove',
+        icon: 'question',
+        showCancelButton: true,
+        showConfirmButton: true
+      })
+
+      if (button.isConfirmed) {
+        const res = await axios.delete(config.apiPath + '/product/remove/' + item.id, config.headers())
+        
+        if (res.data.message === 'success') {
+          Swal.fire({
+            title: 'remove',
+            text: 'remove success',
+            icon: 'success',
+            timer: 1000
+          })
+        }
+      }
+
+    } catch (e) {
+      Swal.fire({
+        title: 'error',
+        text: e.message,
+        icon: 'error'
+      })
+    }
+  }
+
+  // Function Upload Image
+
+  const selectedFile = (inputFile) => {
+    if (inputFile !== undefined) {
+      if (inputFile.length > 0) {
+        setImg(inputFile[0])
+      }
+    }
+  }
+
+  const hadleUpload = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('img', img)
+
+      const res = await axios.post(config.apiPath + '/product/upload', formData, {
+        headers: {
+          'Content-Type': 'mutipart/form-data',
+          'Authorization': localStorage.getItem('token')
+        }
+      })
+
+      if (res.data.newName !== undefined) {
+        return res.data.newName
+      }
+
+    } catch (e) {
+      Swal.fire({
+        title: 'error',
+        text: e.message,
+        icon: 'error'
+      })
+
+      return ""
+    }
+  }
+
+  function showImage(item) {
+    if (item.img !== "") {
+      return <img alt='' className='img-fluid' src={config.apiPath + '/uploads/' + item.img}/>
+    }
+
+    return <></>
+  }
+
+  //Function Upload File Excel
+
+  const selectedFileExcel = (fileInput) => {
+    if (fileInput !== undefined) {
+      if (fileInput.length > 0) {
+        setFileExcel(fileInput[0])
+      }
+    }
+  }
+
+  const handleUploadExcel =  async () => {
+    try {
+      const formData = new FormData()
+      formData.append('fileExcel', fileExcel)
+
+      const res = await axios.post(config.apiPath + '/product/uploadFromExcel', formData, {
+        headers: {
+          'Content-Type': 'mutipart/form-data',
+          'Authorization': localStorage.setItem('token')
+        }
+      })
+
+      if (res.data.message === 'success') {
+        Swal.fire({
+          title: 'upload file',
+          text: 'upload success',
+          icon: 'success',
+          timer: 1000
+        })
+
+        fetchData()
+
+        document.getElementById('modalExcel_btnClose').click()
+      }
+    } catch (e) {
+      Swal.fire({
+        title: 'error',
+        text: e.message,
+        icon: 'error'
+      })
+    }
+
+  }
+
+  const clearFormExcel = () => {
+
+  }
+
 
   return <BackOffice>
     <div className='h4'>Product</div>
-    <button onClick={clearForm} className='btn btn-primary' data-toggle='modal' data-target='#modalProduct'>
-      <i className='fa fa-plus'>เพิ่มรายการ</i>
+    <button onClick={clearForm} className='btn btn-primary mr-2' data-toggle='modal' data-target='#modalProduct'>
+      <i className='fa fa-plus'></i>เพิ่มรายการ
+    </button>
+    <button onClick={clearFormExcel} className='btn btn-success' data-toggle='modal' data-target='#modalExcel'>
+      <i className='fa fa-arrow-down mr-2'></i>Import from Excel
     </button>
 
     <table className='mt-3 table table-bordered table-striped'>
       <thead>
         <tr>
-          <th>name</th>
+          <th width='150px'>ภาพสินค้า</th>
+          <th >name</th>
           <th width='150px' className='text-right'>cost</th>
           <th width='150px' className='text-right'>price</th>
           <th width='140px'></th>
@@ -83,15 +237,20 @@ function Product() {
       </thead>
       <tbody>
         {products.length > 0 ? products.map(item =>
-        <tr>
+        <tr key={item.id}>
+          <td>{showImage(item)}</td>
           <td>{item.name}</td>
           <td className='text-right'>{item.cost}</td>
           <td className='text-right'>{item.price}</td>
           <td className='text-center'>
-            <button className='btn btn-primary mr-2'>
+            <button className='btn btn-primary mr-2'
+              data-toggle='modal'
+              data-target='#modalProduct'
+              onClick={e => setProduct(item)}
+            >
               <i className='fa fa-edit'></i>
             </button>
-            <button className='btn btn-danger'>
+            <button className='btn btn-danger' onClick={e => handleRemove(item)}>
               <i className='fa fa-times'></i>
             </button>
           </td>
@@ -117,8 +276,9 @@ function Product() {
       </div>
 
       <div className='mt-3'>
+        <div className='mb-3'>{showImage(product)}</div>
         <div>ภาพสินค้า</div>
-        <input className='form-control' type='file'></input>
+        <input className='form-control' type='file' ref={refImg} onChange={e => selectedFile(e.target.files)}></input>
       </div>
 
       <div className='mt-3'> 
@@ -128,6 +288,15 @@ function Product() {
       </div>
 
 
+    </MyModal>
+
+    <MyModal id='modalExcel' title='เลือกไฟล์'>
+        <div>เลือกไฟล์</div>
+        <input className='form-control' type='file' ref={refExcel} onChange={e => selectedFileExcel(e.target.files)}></input>
+
+        <button className='mt-3 btn btn-primary' onClick={handleUploadExcel}>
+          <i className='fa fa-check mr-2'></i>Save
+        </button>
     </MyModal>
   </BackOffice>
 }
